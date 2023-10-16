@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+        #Control_Button_Box {
+            position: relative;
+            display: flex;
+            width: 100%;
+            height: 50px;
+            /* background-color: red; */
+            align-items: center;
+        }
+        .C_B {
+            display: flex;
+            margin-left: 10px;
+            width: 200px;
+            height: 80%;
+            border: 1px solid #000;
+            /* background-color: yellow; */
+            font-size: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+        #todo_list_select {
+            margin-left: 10px;
+            width: 200px;
+            height: 80%;
+            font-size: 20px;
+        }
+        #Show_todo {
+            position: relative;
+            width: 100%;
+            height: calc(100% - 50px);
+            /* background-color: yellow; */
+            font-size: 18px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        td {
+            border: 1px solid #000;
+        }
+        .Complete {
+            background-color: greenyellow;
+        }
+        .Complete:hover {
+            background-color: red;
+        }
+        .UnComplete {
+            background-color: red;
+        }
+        .UnComplete:hover {
+            background-color: greenyellow;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="Control_Button_Box">
+        <div id="Add_todo" class="C_B" onclick="Add_todo()">新增待辦事項</div>  <!-- 新增按鈕 -->
+        <select name="todo_list" id="todo_list_select" onchange="Change_todo_list(this)">  <!-- 切換查看待辦事項類別 -->
+            <option value="All">所有事項</option>
+            <option value="UnComplete">未完成事項</option>
+            <option value="Complete">已完成事項</option>
+        </select>
+    </div>
+
+    <div id="Show_todo"></div>
+
+    <!-- js -->
+    <script>
+        function Add_todo() {
+            location.href = "./0.輸入表單.html";
+        }
+
+        function Delete_todo(id_todo) {
+            fetch("../control/Delete_todo.php?id="+id_todo,{
+	        	method: 'GET', // or 'GET'
+	        })
+
+            document.getElementById("todo_"+ id_todo).style.display = "none";
+        }
+
+        function Change_Complete(todo_id) {
+            fetch("../control/Change_Complete.php?id="+todo_id+"&Complete="+event.target.innerHTML,{
+	        	method: 'GET', // or 'GET'
+	        })
+            
+            var Complete = "";
+            if(event.target.innerHTML == "Complete") {
+                Complete = "UnComplete";
+            }
+            else {
+                Complete = "Complete";
+            }
+            var target = document.getElementById("todo_"+todo_id).getElementsByClassName("todo_complete")[0];
+            target.innerHTML = Complete;
+            target.className = "todo_complete "+Complete;
+        }
+
+        function Edit_todo(todo_id) {
+            //向URL發出request
+	        fetch("../control/Edit_todo.php?id="+todo_id,{
+	        	method: 'GET', // or 'GET'
+	        })
+	        .then(function(res){ //fetch的callback function，傳回值是promise物件: res
+	        	//將res的內容轉為文字，傳給下一個Callback function
+	        	return res.text();
+	        })
+	        .then(function(data){ //下一個callback function，參數data是上一個callback傳進來的文字
+	        	
+	        	//找到要顯示內容的div
+	        	let div = document.getElementById('Show_todo');
+	        	//將傳進來的文字放進div中
+	        	div.innerHTML=data;
+	        })
+        }
+
+        function Change_todo_list(element) {
+            //向URL發出request
+	        fetch("../control/Change_todo_list.php?list="+element.value,{
+	        	method: 'GET', // or 'GET'
+	        })
+	        .then(function(res){ //fetch的callback function，傳回值是promise物件: res
+	        	//將res的內容轉為文字，傳給下一個Callback function
+	        	return res.text();
+	        })
+	        .then(function(data){ //下一個callback function，參數data是上一個callback傳進來的文字
+	        	//找到要顯示內容的div
+	        	let div = document.getElementById('Show_todo');
+	        	//將傳進來的文字放進div中
+	        	div.innerHTML=data;
+	        })
+        }
+
+        var Default_1 = Change_todo_list({value: "All"});  //載入頁面默認執行一次
+    </script>
+</body>
+</html>
